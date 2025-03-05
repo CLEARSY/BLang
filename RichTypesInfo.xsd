@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <?xml-stylesheet type="text/xsl" href="xs3p.xsl"?> -->
+
+<xs:schema elementFormDefault="qualified"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:annotation>
+        <xs:documentation xml:lang="en"> This xsd describes the grammar followed by the
+            RichTypeInfos tag added by atypik. </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType name="PowerSet">
+        <xs:annotation>
+            <xs:documentation> Represents the power set of a type. </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="arg" type="xs:integer">
+            <xs:annotation>
+                <xs:documentation> The type of wich the power set is applied. </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="CartesianProduct">
+        <xs:annotation>
+            <xs:documentation> Represents the cartesian product between two types. </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="arg1" type="xs:integer">
+            <xs:annotation>
+                <xs:documentation> A reference on the id of the left operand. </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="arg2" type="xs:integer">
+            <xs:annotation>
+                <xs:documentation> A reference on the id of the right operand. </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="AbstractSet">
+        <xs:annotation>
+            <xs:documentation> Represents an abstract set defined or used as a parameter in a B
+                machine. </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string">
+            <xs:annotation>
+                <xs:documentation> The name of the abstract set. </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="EnumeratedValue">
+        <xs:annotation>
+            <xs:documentation> Represents an enumerated value contained in a set. </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string">
+            <xs:annotation>
+                <xs:documentation> The name of the value. </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="EnumeratedSet">
+        <xs:annotation>
+            <xs:documentation> Represents an enumerated set defined in a B machine. </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string">
+            <xs:annotation>
+                <xs:documentation> The name of the enumerated set. </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:sequence>
+            <xs:annotation>
+                <xs:documentation> A sequence of enumerated value representing the values contained
+                    in the set. </xs:documentation>
+            </xs:annotation>
+            <xs:element name="EnumeratedValue" type="EnumeratedValue" minOccurs="1"
+                maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Field">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="type" type="xs:integer"/>
+    </xs:complexType>
+
+    <xs:complexType name="StructType">
+        <xs:sequence>
+            <xs:element name="Field" type="Field" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RichType">
+        <xs:annotation>
+            <xs:documentation> 
+                Represents a B type. It can be a boolean, an integer, a real, a float, a string, a
+                power set, a cartesian product, an abstract set or an enumerated set. </xs:documentation>
+        </xs:annotation>
+        <xs:choice>
+            <xs:element name="BOOL" />
+            <xs:element name="INTEGER" />
+            <xs:element name="REAL" />
+            <xs:element name="FLOAT" />
+            <xs:element name="STRING" />
+            <xs:element name="PowerSet" type="PowerSet" />
+            <xs:element name="CartesianProduct" type="CartesianProduct" />
+            <xs:element name="AbstractSet" type="AbstractSet" />
+            <xs:element name="EnumeratedSet" type="EnumeratedSet" />
+        </xs:choice>
+        <xs:attribute name="id" type="xs:integer">
+            <xs:annotation>
+                <xs:documentation> A unique identifier associated to the type. </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="RichTypesInfo">
+        <xs:annotation>
+            <xs:documentation> The main tag added by atypik. It contains a sequence of types. </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:annotation>
+                <xs:documentation> A sequence of the types infered by atypik. </xs:documentation>
+            </xs:annotation>
+            <xs:element name="RichType" type="RichType" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

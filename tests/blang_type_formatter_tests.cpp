@@ -1,7 +1,11 @@
-/*
-   This file is part of BTYPE.
-   Copyright © CLEARSY 2025
-   BTYPE is free software: you can redistribute it and/or modify
+/* @file btype_formatter_tests.cpp
+   @brief Unit tests for the BLang::Type formatting.
+
+   @note This file is part of BLang.
+   @copyright Copyright © CLEARSY 2025
+   @license GNU General Public License (GPL) version 3
+
+   BLang is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
@@ -18,7 +22,7 @@
 #include <thread>
 #include <vector>
 
-#include "btype_fmt.h"
+#include "blang_type_fmt.h"
 
 class BTypeFmtTest : public ::testing::Test {
  protected:
@@ -27,67 +31,69 @@ class BTypeFmtTest : public ::testing::Test {
 
 // Formatter Tests
 TEST_F(BTypeFmtTest, BasicTypeFormatting) {
-  EXPECT_EQ(fmt::format("{}", BTypeFactory::Integer()), "INTEGER");
-  EXPECT_EQ(fmt::format("{}", BTypeFactory::Boolean()), "BOOLEAN");
-  EXPECT_EQ(fmt::format("{}", BTypeFactory::Float()), "FLOAT");
-  EXPECT_EQ(fmt::format("{}", BTypeFactory::Real()), "REAL");
-  EXPECT_EQ(fmt::format("{}", BTypeFactory::String()), "STRING");
+  EXPECT_EQ(fmt::format("{}", BLang::TypeFactory::Integer()), "INTEGER");
+  EXPECT_EQ(fmt::format("{}", BLang::TypeFactory::Boolean()), "BOOLEAN");
+  EXPECT_EQ(fmt::format("{}", BLang::TypeFactory::Float()), "FLOAT");
+  EXPECT_EQ(fmt::format("{}", BLang::TypeFactory::Real()), "REAL");
+  EXPECT_EQ(fmt::format("{}", BLang::TypeFactory::String()), "STRING");
+  EXPECT_EQ(fmt::format("{}", BLang::TypeFactory::Undefined()), "?");
 }
 
 TEST_F(BTypeFmtTest, ProductTypeFormatting) {
-  auto product =
-      BTypeFactory::Product(BTypeFactory::Integer(), BTypeFactory::Boolean());
+  auto product = BLang::TypeFactory::Product(BLang::TypeFactory::Integer(),
+                                             BLang::TypeFactory::Boolean());
   EXPECT_EQ(fmt::format("{}", product), "(INTEGER × BOOLEAN)");
 }
 
 TEST_F(BTypeFmtTest, PowerTypeFormatting) {
-  auto powerSet = BTypeFactory::PowerSet(BTypeFactory::Integer());
+  auto powerSet = BLang::TypeFactory::PowerSet(BLang::TypeFactory::Integer());
   EXPECT_EQ(fmt::format("{}", powerSet), "ℙ(INTEGER)");
 }
 
 TEST_F(BTypeFmtTest, AbstractSetFormatting) {
-  auto abstractSet = BTypeFactory::AbstractSet("MySet");
+  auto abstractSet = BLang::TypeFactory::AbstractSet("MySet");
   EXPECT_EQ(fmt::format("{}", abstractSet), "MySet");
 }
 
 TEST_F(BTypeFmtTest, EnumeratedSetFormatting) {
   std::vector<std::string> values = {"One", "Two", "Three"};
-  auto enumSet = BTypeFactory::EnumeratedSet("Colors", values);
+  auto enumSet = BLang::TypeFactory::EnumeratedSet("Colors", values);
   EXPECT_EQ(fmt::format("{}", enumSet), "Colors");
 }
 
 TEST_F(BTypeFmtTest, StructTypeFormatting) {
-  std::vector<std::pair<std::string, std::shared_ptr<BType>>> fields = {
-      {"field1f", BTypeFactory::Integer()},
-      {"field2f", BTypeFactory::Boolean()}};
-  auto record = BTypeFactory::Struct(fields);
+  std::vector<std::pair<std::string, std::shared_ptr<BLang::Type>>> fields = {
+      {"field1f", BLang::TypeFactory::Integer()},
+      {"field2f", BLang::TypeFactory::Boolean()}};
+  auto record = BLang::TypeFactory::Struct(fields);
   EXPECT_EQ(fmt::format("{}", record),
             "struct({field1f: INTEGER, field2f: BOOLEAN})");
 }
 
 TEST_F(BTypeFmtTest, NullptrFormatting) {
-  std::shared_ptr<BType> nullType;
+  std::shared_ptr<BLang::Type> nullType;
   EXPECT_EQ(fmt::format("{}", nullType), "nullptr");
 }
 
 TEST_F(BTypeFmtTest, NestedTypeFormatting) {
   // Test nested product type
-  auto nestedProduct = BTypeFactory::Product(
-      BTypeFactory::Product(BTypeFactory::Integer(), BTypeFactory::Boolean()),
-      BTypeFactory::String());
+  auto nestedProduct = BLang::TypeFactory::Product(
+      BLang::TypeFactory::Product(BLang::TypeFactory::Integer(),
+                                  BLang::TypeFactory::Boolean()),
+      BLang::TypeFactory::String());
   EXPECT_EQ(fmt::format("{}", nestedProduct), "((INTEGER × BOOLEAN) × STRING)");
 
   // Test nested power type
-  auto nestedPower =
-      BTypeFactory::PowerSet(BTypeFactory::PowerSet(BTypeFactory::Integer()));
+  auto nestedPower = BLang::TypeFactory::PowerSet(
+      BLang::TypeFactory::PowerSet(BLang::TypeFactory::Integer()));
   EXPECT_EQ(fmt::format("{}", nestedPower), "ℙ(ℙ(INTEGER))");
 
   // Test complex nested structure
-  std::vector<std::pair<std::string, std::shared_ptr<BType>>> fields = {
-      {"field1g",
-       BTypeFactory::Product(BTypeFactory::Integer(), BTypeFactory::Boolean())},
-      {"field2g", BTypeFactory::PowerSet(BTypeFactory::String())}};
-  auto complexStruct = BTypeFactory::Struct(fields);
+  std::vector<std::pair<std::string, std::shared_ptr<BLang::Type>>> fields = {
+      {"field1g", BLang::TypeFactory::Product(BLang::TypeFactory::Integer(),
+                                              BLang::TypeFactory::Boolean())},
+      {"field2g", BLang::TypeFactory::PowerSet(BLang::TypeFactory::String())}};
+  auto complexStruct = BLang::TypeFactory::Struct(fields);
   EXPECT_EQ(fmt::format("{}", complexStruct),
             "struct({field1g: (INTEGER × BOOLEAN), field2g: ℙ(STRING)})");
 }
@@ -97,10 +103,10 @@ TEST_F(BTypeFmtTest, FormatterThreadSafety) {
   std::vector<std::thread> threads;
   std::vector<std::string> results(numThreads);
 
-  auto complexType = BTypeFactory::Product(
-      BTypeFactory::PowerSet(BTypeFactory::Integer()),
-      BTypeFactory::Struct({{"field1t", BTypeFactory::Boolean()},
-                            {"field2t", BTypeFactory::String()}}));
+  auto complexType = BLang::TypeFactory::Product(
+      BLang::TypeFactory::PowerSet(BLang::TypeFactory::Integer()),
+      BLang::TypeFactory::Struct({{"field1t", BLang::TypeFactory::Boolean()},
+                                  {"field2t", BLang::TypeFactory::String()}}));
 
   for (int i = 0; i < numThreads; ++i) {
     threads.emplace_back([&results, complexType, i]() {
@@ -120,16 +126,8 @@ TEST_F(BTypeFmtTest, FormatterThreadSafety) {
 }
 
 TEST_F(BTypeFmtTest, FormatterEdgeCases) {
-  // Empty struct
-  auto emptyStruct = BTypeFactory::Struct({});
-  EXPECT_EQ(fmt::format("{}", emptyStruct), "struct({})");
-
-  // Empty enumerated set
-  auto emptyEnum = BTypeFactory::EnumeratedSet("Empty", {});
-  EXPECT_EQ(fmt::format("{}", emptyEnum), "Empty");
-
   // Abstract set with special characters
-  auto specialSet = BTypeFactory::AbstractSet("Set@#$%");
+  auto specialSet = BLang::TypeFactory::AbstractSet("Set@#$%");
   EXPECT_EQ(fmt::format("{}", specialSet), "Set@#$%");
 }
 

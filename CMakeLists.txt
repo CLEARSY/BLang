@@ -10,6 +10,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
+
 # Add compile options
 if(MSVC)
     add_compile_options(/W4 /WX)
@@ -19,6 +21,7 @@ endif()
 
 find_package(fmt REQUIRED)
 find_package(Threads REQUIRED)
+find_package(tinyxml2 REQUIRED)
 
 add_subdirectory(src)
 
@@ -31,4 +34,4 @@ endif()
 # Installation configuration
 include(GNUInstallDirs)
 
-install(TARGETS btype DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS BLang DESTINATION ${CMAKE_INSTALL_LIBDIR})

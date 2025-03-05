@@ -1,7 +1,11 @@
-/*
-   This file is part of BTYPE.
-   Copyright © CLEARSY 2025
-   BTYPE is free software: you can redistribute it and/or modify
+/* @file blang_type_fmt.h
+   @brief Support for formatting for the BLang::Type classes.
+
+   @note This file is part of BLang.
+   @copyright Copyright © CLEARSY 2025
+   @license GNU General Public License (GPL) version 3
+
+   BLang is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
@@ -13,56 +17,56 @@
    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef BTYPE_FMT_H
-#define BTYPE_FMT_H
+#ifndef BLANG_TYPE_FMT_H
+#define BLANG_TYPE_FMT_H
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
-#include "btype.h"
+#include "blang_type.h"
 
 // Forward declare formatter specializations
 template <>
-struct fmt::formatter<BType>;
+struct fmt::formatter<BLang::Type>;
 template <>
-struct fmt::formatter<std::shared_ptr<BType>>;
+struct fmt::formatter<std::shared_ptr<BLang::Type>>;
 template <>
-struct fmt::formatter<BType::ProductType>;
+struct fmt::formatter<BLang::Type::ProductType>;
 template <>
-struct fmt::formatter<BType::PowerType>;
+struct fmt::formatter<BLang::Type::PowerType>;
 template <>
-struct fmt::formatter<BType::AbstractSet>;
+struct fmt::formatter<BLang::Type::AbstractSet>;
 template <>
-struct fmt::formatter<BType::EnumeratedSet>;
+struct fmt::formatter<BLang::Type::EnumeratedSet>;
 template <>
-struct fmt::formatter<BType::StructType>;
+struct fmt::formatter<BLang::Type::StructType>;
 
-// Formatter for shared_ptr<BType>
+// Formatter for shared_ptr<Type>
 template <>
-struct fmt::formatter<std::shared_ptr<BType>> {
+struct fmt::formatter<std::shared_ptr<BLang::Type>> {
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
 
   template <typename FormatContext>
-  auto format(const std::shared_ptr<BType>& type, FormatContext& ctx) const
-      -> decltype(ctx.out()) {
+  auto format(const std::shared_ptr<BLang::Type>& type,
+              FormatContext& ctx) const -> decltype(ctx.out()) {
     if (!type) return fmt::format_to(ctx.out(), "nullptr");
     return fmt::format_to(ctx.out(), "{}", *type);
   }
 };
 
-// Formatter for BType
+// Formatter for Type
 template <>
-struct fmt::formatter<BType> {
+struct fmt::formatter<BLang::Type> {
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
 
   template <typename FormatContext>
-  auto format(const BType& type, FormatContext& ctx) const
+  auto format(const BLang::Type& type, FormatContext& ctx) const
       -> decltype(ctx.out()) {
-    class FormatterVisitor : public BType::Visitor {
+    class FormatterVisitor : public BLang::Type::Visitor {
      public:
       std::string result;
 
@@ -72,25 +76,27 @@ struct fmt::formatter<BType> {
       void visitREAL() override { result = "REAL"; }
       void visitSTRING() override { result = "STRING"; }
 
-      void visitProductType(const BType::ProductType& t) override {
+      void visitProductType(const BLang::Type::ProductType& t) override {
         result = fmt::format("{}", t);
       }
 
-      void visitPowerType(const BType::PowerType& t) override {
+      void visitPowerType(const BLang::Type::PowerType& t) override {
         result = fmt::format("{}", t);
       }
 
-      void visitAbstractSet(const BType::AbstractSet& t) override {
+      void visitAbstractSet(const BLang::Type::AbstractSet& t) override {
         result = fmt::format("{}", t);
       }
 
-      void visitEnumeratedSet(const BType::EnumeratedSet& t) override {
+      void visitEnumeratedSet(const BLang::Type::EnumeratedSet& t) override {
         result = fmt::format("{}", t);
       }
 
-      void visitStructType(const BType::StructType& t) override {
+      void visitStructType(const BLang::Type::StructType& t) override {
         result = fmt::format("{}", t);
       }
+
+      void visitUndefinedType() override { result = "?"; }
     };
 
     FormatterVisitor visitor;
@@ -101,13 +107,13 @@ struct fmt::formatter<BType> {
 
 // Formatter for ProductType
 template <>
-struct fmt::formatter<BType::ProductType> {
+struct fmt::formatter<BLang::Type::ProductType> {
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
 
   template <typename FormatContext>
-  auto format(const BType::ProductType& type, FormatContext& ctx) const
+  auto format(const BLang::Type::ProductType& type, FormatContext& ctx) const
       -> decltype(ctx.out()) {
     return fmt::format_to(ctx.out(), "({} × {})", type.lhs, type.rhs);
   }
@@ -115,13 +121,13 @@ struct fmt::formatter<BType::ProductType> {
 
 // Formatter for PowerType
 template <>
-struct fmt::formatter<BType::PowerType> {
+struct fmt::formatter<BLang::Type::PowerType> {
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
 
   template <typename FormatContext>
-  auto format(const BType::PowerType& type, FormatContext& ctx) const
+  auto format(const BLang::Type::PowerType& type, FormatContext& ctx) const
       -> decltype(ctx.out()) {
     return fmt::format_to(ctx.out(), "ℙ({})", type.m_content);
   }
@@ -129,13 +135,13 @@ struct fmt::formatter<BType::PowerType> {
 
 // Formatter for AbstractSet
 template <>
-struct fmt::formatter<BType::AbstractSet> {
+struct fmt::formatter<BLang::Type::AbstractSet> {
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
 
   template <typename FormatContext>
-  auto format(const BType::AbstractSet& type, FormatContext& ctx) const
+  auto format(const BLang::Type::AbstractSet& type, FormatContext& ctx) const
       -> decltype(ctx.out()) {
     return fmt::format_to(ctx.out(), "{}", type.getName());
   }
@@ -143,13 +149,13 @@ struct fmt::formatter<BType::AbstractSet> {
 
 // Formatter for EnumeratedSet
 template <>
-struct fmt::formatter<BType::EnumeratedSet> {
+struct fmt::formatter<BLang::Type::EnumeratedSet> {
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
 
   template <typename FormatContext>
-  auto format(const BType::EnumeratedSet& type, FormatContext& ctx) const
+  auto format(const BLang::Type::EnumeratedSet& type, FormatContext& ctx) const
       -> decltype(ctx.out()) {
     return fmt::format_to(ctx.out(), "{}", type.getName());
   }
@@ -157,13 +163,13 @@ struct fmt::formatter<BType::EnumeratedSet> {
 
 // Formatter for RecordType
 template <>
-struct fmt::formatter<BType::StructType> {
+struct fmt::formatter<BLang::Type::StructType> {
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
 
   template <typename FormatContext>
-  auto format(const BType::StructType& type, FormatContext& ctx) const
+  auto format(const BLang::Type::StructType& type, FormatContext& ctx) const
       -> decltype(ctx.out()) {
     std::string fields;
     bool first = true;
@@ -176,4 +182,4 @@ struct fmt::formatter<BType::StructType> {
   }
 };
 
-#endif  // BTYPE_FMT_H
+#endif  // BLANG_TYPE_FMT_H
