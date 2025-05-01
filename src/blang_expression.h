@@ -61,8 +61,18 @@ class Expression : public std::enable_shared_from_this<Expression> {
   enum class Kind {
     TRUE,
     FALSE,
+    ConversionBool,
   };
   Kind getKind() const { return m_kind; };
+
+  // Forward declaration of derived classes
+  class ConversionBool;
+
+  /** @brief converts a predicate to a Boolean expression, if possible.
+   * @return a shared pointer to the corresponding Boolean expression, or
+   * nullptr if not possible.
+   */
+  std::shared_ptr<const ConversionBool> toConversionBool() const;
 
   /**
    * @brief Abstract visitor class for the Expression hierarchy.
@@ -73,6 +83,7 @@ class Expression : public std::enable_shared_from_this<Expression> {
    public:
     virtual void visitTRUE() = 0;
     virtual void visitFALSE() = 0;
+    virtual void visitConversionBool(const ConversionBool &v) = 0;
   };
   virtual void accept(Visitor &v) const;
 
@@ -193,6 +204,8 @@ class ExpressionFactory {
 
   static std::shared_ptr<Expression> TRUE();
   static std::shared_ptr<Expression> FALSE();
+  static std::shared_ptr<Expression> ConversionBool(
+      std::shared_ptr<Predicate> pred);
 
   /**
    * @brief Gets the number of Expressions created by the factory.
@@ -215,6 +228,21 @@ class ExpressionFactory {
    private:
     std::string msg;
   };
+};
+
+class Expression::ConversionBool : public Expression {
+ public:
+  void accept(Visitor &v) const override { v.visitConversionBool(*this); }
+  size_t hash_combine(size_t seed) const override;
+  ConversionBool(std::shared_ptr<Predicate> pred)
+      : Expression(Kind::ConversionBool), m_pred{pred} {}
+  virtual ~ConversionBool() = default;
+  std::shared_ptr<Predicate> pred() const { return m_pred; }
+  friend class ExpressionFactory;
+  friend class ExpressionCache;
+
+ protected:
+  std::shared_ptr<Predicate> m_pred;
 };
 
 }  // namespace BLang

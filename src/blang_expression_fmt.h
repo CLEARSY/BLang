@@ -24,6 +24,7 @@
 #include <fmt/ranges.h>
 
 #include "blang_expression.h"
+#include "blang_predicate_fmt.h"
 
 // Forward declare formatter specializations
 template <>
@@ -39,10 +40,10 @@ struct fmt::formatter<std::shared_ptr<BLang::Expression>> {
   }
 
   template <typename FormatContext>
-  auto format(const std::shared_ptr<BLang::Expression>& type,
+  auto format(const std::shared_ptr<BLang::Expression>& expr,
               FormatContext& ctx) const -> decltype(ctx.out()) {
-    if (!type) return fmt::format_to(ctx.out(), "nullptr");
-    return fmt::format_to(ctx.out(), "{}", *type);
+    if (!expr) return fmt::format_to(ctx.out(), "nullptr");
+    return fmt::format_to(ctx.out(), "{}", *expr);
   }
 };
 
@@ -62,11 +63,28 @@ struct fmt::formatter<BLang::Expression> {
 
       void visitTRUE() override { result = "TRUE"; }
       void visitFALSE() override { result = "FALSE"; }
+      void visitConversionBool(
+          const BLang::Expression::ConversionBool& expr) override {
+        result = fmt::format("{}", expr);
+      }
     };
 
     FormatterVisitor visitor;
     type.accept(visitor);
     return fmt::format_to(ctx.out(), "{}", visitor.result);
+  }
+};
+
+template <>
+struct fmt::formatter<BLang::Expression::ConversionBool> {
+  constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+    return ctx.begin();
+  }
+
+  template <typename FormatContext>
+  auto format(const BLang::Expression::ConversionBool& expr,
+              FormatContext& ctx) const -> decltype(ctx.out()) {
+    return fmt::format_to(ctx.out(), "bool{}", expr.pred());
   }
 };
 

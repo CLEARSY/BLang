@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 #include "blang_expression.h"
+#include "blang_predicate.h"
 
 namespace BLang {
 
@@ -34,11 +35,22 @@ using readlock = std::shared_lock<shared_mutex>;
 using writelock = std::unique_lock<shared_mutex>;
 using std::unordered_map;
 
+struct UnaryPredicateHash {
+  size_t operator()(const shared_ptr<Predicate>& p) const {
+    return p->hash_combine(0);
+  }
+};
+
 // Thread-safe expression caches
 class ExpressionCache {
  private:
   mutable shared_mutex m_basic;
+  mutable shared_mutex m_mutexConversionBool;
   mutable shared_mutex m_mutexIndex;
+
+  unordered_map<shared_ptr<Predicate>, shared_ptr<Expression::ConversionBool>,
+                UnaryPredicateHash>
+      m_conversionsBool;
 
   shared_ptr<Expression> m_TRUE;
   shared_ptr<Expression> m_FALSE;
@@ -100,6 +112,28 @@ class ExpressionCache {
     index(m_FALSE);
     return m_FALSE;
   }
+
+  shared_ptr<Expression> getConversionBool(shared_ptr<Predicate> pred) {
+    {
+      readlock rlock(m_mutexConversionBool);
+      auto it = m_conversionsBool.find(pred);
+      if (it != m_conversionsBool.end()) {
+        return it->second;
+      }
+    }
+    shared_ptr<Expression::ConversionBool> newExpression;
+    {
+      writelock wlock(m_mutexConversionBool);
+      auto it = m_conversionsBool.find(pred);
+      if (it != m_conversionsBool.end()) {
+        return it->second;
+      }
+      newExpression = std::make_shared<Expression::ConversionBool>(pred);
+      m_conversionsBool[pred] = newExpression;
+    }
+    index(newExpression);
+    return newExpression;
+  }
 };
 
 static std::unique_ptr<ExpressionCache> cache =
@@ -111,6 +145,10 @@ shared_ptr<Expression> ExpressionFactory::TRUE() { return cache->getTRUE(); }
 
 shared_ptr<Expression> ExpressionFactory::FALSE() { return cache->getFALSE(); }
 
+shared_ptr<Expression> ExpressionFactory::ConversionBool(
+    shared_ptr<Predicate> pred) {
+  return cache->getConversionBool(pred);
+}
 size_t ExpressionFactory::size() { return cache->size(); }
 
 shared_ptr<Expression> ExpressionFactory::at(size_t index) {

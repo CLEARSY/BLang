@@ -33,6 +33,11 @@ class BLangExpressionFmtTest : public ::testing::Test {
 TEST_F(BLangExpressionFmtTest, ConstantExpressionFormatting) {
   EXPECT_EQ(fmt::format("{}", BLang::ExpressionFactory::TRUE()), "TRUE");
   EXPECT_EQ(fmt::format("{}", BLang::ExpressionFactory::FALSE()), "FALSE");
+  EXPECT_EQ(fmt::format("{}", BLang::ExpressionFactory::ConversionBool(
+                                  BLang::PredicateFactory::Equality(
+                                      BLang::ExpressionFactory::TRUE(),
+                                      BLang::ExpressionFactory::FALSE()))),
+            "bool(TRUE = FALSE)");
 }
 
 // main function

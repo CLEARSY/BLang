@@ -175,6 +175,16 @@ class XMLWriter : public Expression::Visitor, public Predicate::Visitor {
     m_indent.write();
     m_os << "<Boolean_Literal value=\"FALSE\"/>\n";
   };
+  virtual void visitConversionBool(
+      const Expression::ConversionBool &p) override {
+    m_indent.write();
+    m_os << "<Boolean_Exp>\n";
+    m_indent.increase();
+    p.pred()->accept(*this);
+    m_indent.decrease();
+    m_indent.write();
+    m_os << "</Boolean_Exp>\n";
+  };
   virtual void visitConjunction(const Predicate::Conjunction &p) override {
     m_indent.write();
     m_os << "<Nary_Pred op=\"&amp;\">\n";

@@ -100,13 +100,13 @@ TEST_F(BLangXMLWriterTest, WriteXMLRichTypesInfo) {
 }
 
 TEST_F(BLangXMLWriterTest, WriteXMLExpression) {
-  // Create various types
-  auto trueExp = BLang::ExpressionFactory::TRUE();
-  auto falseExp = BLang::ExpressionFactory::FALSE();
-
-  // Generate XML
   std::ostringstream os;
   std::string xmlOutput;
+
+  auto trueExp = BLang::ExpressionFactory::TRUE();
+  auto falseExp = BLang::ExpressionFactory::FALSE();
+  auto conversionBoolExp = BLang::ExpressionFactory::ConversionBool(
+      BLang::PredicateFactory::Equality(trueExp, falseExp));
 
   BLang::writeXML(os, trueExp);
   xmlOutput = os.str();
@@ -119,6 +119,11 @@ TEST_F(BLangXMLWriterTest, WriteXMLExpression) {
   EXPECT_TRUE(xmlOutput.find("<Boolean_Literal value=\"FALSE\"/>") !=
               std::string::npos);
   os.str(std::string());
+
+  BLang::writeXML(os, conversionBoolExp);
+  xmlOutput = os.str();
+  EXPECT_TRUE(xmlOutput.find(R"(<Boolean_Exp>)") != std::string::npos);
+  EXPECT_TRUE(xmlOutput.find(R"(</Boolean_Exp>)") != std::string::npos);
 }
 
 TEST_F(BLangXMLWriterTest, WriteXMLPredicate) {

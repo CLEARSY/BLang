@@ -127,6 +127,12 @@ TEST_F(BLangTinyXml2ReaderTest, ReadExpression) {
   <Expressions>
     <Boolean_Literal value="TRUE"/>
     <Boolean_Literal value="FALSE"/>
+    <Boolean_Exp>
+      <Exp_Comparison op="=">
+        <Boolean_Literal value="FALSE"/>
+        <Boolean_Literal value="TRUE"/>
+      </Exp_Comparison>
+    </Boolean_Exp>
   </Expressions>
   )";
 
@@ -138,20 +144,28 @@ TEST_F(BLangTinyXml2ReaderTest, ReadExpression) {
   tinyxml2::XMLElement* root = doc.FirstChildElement();
   ASSERT_NE(root, nullptr) << "Root element not found";
 
-  tinyxml2::XMLElement* firstChild = root->FirstChildElement();
-  ASSERT_NE(firstChild, nullptr) << "First child element not found";
-  tinyxml2::XMLElement* secondChild = firstChild->NextSiblingElement();
-  ASSERT_NE(secondChild, nullptr) << "Second child element not found";
+  tinyxml2::XMLElement* elem1 = root->FirstChildElement();
+  ASSERT_NE(elem1, nullptr) << "First child element not found";
+  tinyxml2::XMLElement* elem2 = elem1->NextSiblingElement();
+  ASSERT_NE(elem2, nullptr) << "Second child element not found";
+  tinyxml2::XMLElement* elem3 = elem2->NextSiblingElement();
+  ASSERT_NE(elem3, nullptr) << "Third child element not found";
   std::shared_ptr<BLang::Expression> expr1;
   std::shared_ptr<BLang::Expression> expr2;
+  std::shared_ptr<BLang::Expression> expr3;
   try {
-    expr1 = BLang::readExpression(firstChild);
-    expr2 = BLang::readExpression(secondChild);
+    expr1 = BLang::readExpression(elem1);
+    expr2 = BLang::readExpression(elem2);
+    expr3 = BLang::readExpression(elem3);
   } catch (const BLang::ExpressionFactory::Exception& e) {
     FAIL() << "Exception during XML build: " << e.what();
   }
   ASSERT_EQ(expr1, BLang::ExpressionFactory::TRUE());
   ASSERT_EQ(expr2, BLang::ExpressionFactory::FALSE());
+  ASSERT_EQ(expr3, BLang::ExpressionFactory::ConversionBool(
+                       BLang::PredicateFactory::Equality(
+                           BLang::ExpressionFactory::FALSE(),
+                           BLang::ExpressionFactory::TRUE())));
 }
 
 TEST_F(BLangTinyXml2ReaderTest, ReadPredicate) {

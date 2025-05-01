@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "blang_expression.h"
+#include "blang_predicate.h"
 
 class BLangExpressionTest : public ::testing::Test {
  protected:
@@ -100,7 +101,9 @@ class TestVisitor : public BLang::Expression::Visitor {
  public:
   void visitTRUE() override { lastVisited = "TRUE"; }
   void visitFALSE() override { lastVisited = "FALSE"; }
-
+  void visitConversionBool(const BLang::Expression::ConversionBool &) override {
+    lastVisited = "ConversionBool";
+  }
   std::string lastVisited;
 };
 
@@ -112,6 +115,12 @@ TEST_F(BLangExpressionTest, VisitorPattern) {
 
   BLang::ExpressionFactory::FALSE()->accept(visitor);
   EXPECT_EQ(visitor.lastVisited, "FALSE");
+
+  BLang::ExpressionFactory::ConversionBool(
+      BLang::PredicateFactory::Equality(BLang::ExpressionFactory::TRUE(),
+                                        BLang::ExpressionFactory::FALSE()))
+      ->accept(visitor);
+  EXPECT_EQ(visitor.lastVisited, "ConversionBool");
 }
 
 int main(int argc, char **argv) {

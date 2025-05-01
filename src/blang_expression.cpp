@@ -19,10 +19,18 @@
 #include "blang_expression.h"
 
 #include "blang_hash.h"
+#include "blang_predicate.h"
 
 namespace BLang {
 
-// Type conversion methods
+// Expression conversion methods
+
+std::shared_ptr<const Expression::ConversionBool> Expression::toConversionBool()
+    const {
+  if (m_kind != Kind::ConversionBool) return nullptr;
+  return std::dynamic_pointer_cast<const ConversionBool>(
+      this->shared_from_this());
+}
 
 int Expression::compare(const Expression& v1, const Expression& v2) {
   size_t hash1 = v1.hash_combine(0);
@@ -41,9 +49,15 @@ size_t Expression::hash_combine(size_t seed) const {
       return hash_combine_size_t(trueHash, seed);
     case Kind::FALSE:
       return hash_combine_size_t(falseHash, seed);
+    case Kind::ConversionBool:
+      return toConversionBool()->hash_combine(seed);
   }
   // Should never reach here
   return seed;
+}
+
+size_t Expression::ConversionBool::hash_combine(size_t seed) const {
+  return hash_combine_size_t(m_pred->hash_combine(seed), seed);
 }
 
 // Definition of the virtual accept function
@@ -54,6 +68,9 @@ void Expression::accept(Visitor& v) const {
       break;
     case Kind::FALSE:
       v.visitFALSE();
+      break;
+    case Kind::ConversionBool:
+      toConversionBool()->accept(v);
       break;
   }
 }
