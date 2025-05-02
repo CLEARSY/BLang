@@ -99,7 +99,7 @@ TEST_F(BLangXMLWriterTest, WriteXMLRichTypesInfo) {
               std::string::npos);
 }
 
-TEST_F(BLangXMLWriterTest, WriteXMLExpression) {
+TEST_F(BLangXMLWriterTest, WriteXMLExpressionBooleanLiteral) {
   std::ostringstream os;
   std::string xmlOutput;
 
@@ -117,19 +117,42 @@ TEST_F(BLangXMLWriterTest, WriteXMLExpression) {
   EXPECT_TRUE(xmlOutput.find("<Boolean_Literal value=\"FALSE\"/>") !=
               std::string::npos);
   os.str(std::string());
+}
 
+TEST_F(BLangXMLWriterTest, WriteXMLExpressionConversionBool) {
+  std::ostringstream os;
+  std::string xmlOutput;
+
+  auto trueExp = BLang::ExpressionFactory::TRUE();
+  auto falseExp = BLang::ExpressionFactory::FALSE();
   auto conversionBoolExp = BLang::ExpressionFactory::ConversionBool(
       BLang::PredicateFactory::Equality(trueExp, falseExp));
   BLang::writeXML(os, conversionBoolExp);
   xmlOutput = os.str();
   EXPECT_TRUE(xmlOutput.find(R"(<Boolean_Exp>)") != std::string::npos);
   EXPECT_TRUE(xmlOutput.find(R"(</Boolean_Exp>)") != std::string::npos);
+}
+
+TEST_F(BLangXMLWriterTest, WriteXMLExpressionIntegerLiteral) {
+  std::ostringstream os;
+  std::string xmlOutput;
 
   auto integerExp = BLang::ExpressionFactory::IntegerLiteral("42");
   BLang::writeXML(os, integerExp);
   xmlOutput = os.str();
   EXPECT_TRUE(xmlOutput.find("<Integer_Literal value=\"42\"/>") !=
               std::string::npos);
+  os.str(std::string());
+}
+
+TEST_F(BLangXMLWriterTest, WriteXMLExpressionData) {
+  std::ostringstream os;
+  std::string xmlOutput;
+
+  auto dataExp = BLang::ExpressionFactory::Data("foo");
+  BLang::writeXML(os, dataExp);
+  xmlOutput = os.str();
+  EXPECT_TRUE(xmlOutput.find("<Id value=\"foo\"/>") != std::string::npos);
   os.str(std::string());
 }
 

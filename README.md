@@ -12,9 +12,13 @@ BLang is a C++ library designed to represent the B language. It is thread-safe a
     - Type Comparisons: Equality, Inequality, Less than, Greater than, etc.
     - Undefined type
 - Expressions: 
-  - Boolean literals: `TRUE` and `FALSE`
-  - `bool` operator
-  - Integer literals
+  - Primary expressions:
+    - Data
+  - Boolean expressions:
+    - Boolean literals: `TRUE` and `FALSE`
+    - `bool` operator
+  - Arithmetical expressions:
+    - Integer literals
 - Predicates: Conjunction, Disjunction, Implication, Equivalence, Negation, Equality
 - Maximal Sharing: Efficient memory usage by sharing common subtypes, sub-expressions, sub-predicates
 - Visitor Pattern

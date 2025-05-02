@@ -71,6 +71,9 @@ struct fmt::formatter<BLang::Expression> {
           const BLang::Expression::IntegerLiteral& expr) override {
         result = fmt::format("{}", expr.value());
       }
+      void visitData(const BLang::Expression::Data& expr) override {
+        result = fmt::format("{}", expr.name());
+      }
     };
 
     FormatterVisitor visitor;
@@ -105,4 +108,16 @@ struct fmt::formatter<BLang::Expression::IntegerLiteral> {
   }
 };
 
+template <>
+struct fmt::formatter<BLang::Expression::Data> {
+  constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+    return ctx.begin();
+  }
+
+  template <typename FormatContext>
+  auto format(const BLang::Expression::Data& expr, FormatContext& ctx) const
+      -> decltype(ctx.out()) {
+    return fmt::format_to(ctx.out(), "{}", expr.name());
+  }
+};
 #endif  // BLANG_EXPRESSION_FMT_H

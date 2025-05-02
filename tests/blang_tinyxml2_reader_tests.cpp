@@ -134,6 +134,7 @@ TEST_F(BLangTinyXml2ReaderTest, ReadExpression) {
       </Exp_Comparison>
     </Boolean_Exp>
     <Integer_Literal value="42"/>
+    <Id value="foo"/>
   </Expressions>
   )";
 
@@ -191,6 +192,17 @@ TEST_F(BLangTinyXml2ReaderTest, ReadExpression) {
     FAIL() << "Exception during XML build: " << e.what();
   }
   ASSERT_EQ(expr4, BLang::ExpressionFactory::IntegerLiteral("42"));
+
+  ++count;
+  tinyxml2::XMLElement* elem5 = elem4->NextSiblingElement();
+  ASSERT_NE(elem1, nullptr) << "Child element " << count << " not found";
+  std::shared_ptr<BLang::Expression> expr5;
+  try {
+    expr5 = BLang::readExpression(elem5);
+  } catch (const BLang::ExpressionFactory::Exception& e) {
+    FAIL() << "Exception during XML build: " << e.what();
+  }
+  ASSERT_EQ(expr5, BLang::ExpressionFactory::Data("foo"));
 }
 
 TEST_F(BLangTinyXml2ReaderTest, ReadPredicate) {

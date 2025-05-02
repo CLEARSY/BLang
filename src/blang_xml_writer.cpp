@@ -190,6 +190,10 @@ class XMLWriter : public Expression::Visitor, public Predicate::Visitor {
     m_indent.write();
     m_os << "<Integer_Literal value=\"" << p.value() << "\"/>\n";
   };
+  virtual void visitData(const Expression::Data &p) override {
+    m_indent.write();
+    m_os << "<Id value=\"" << p.name() << "\"/>\n";
+  };
   virtual void visitConjunction(const Predicate::Conjunction &p) override {
     m_indent.write();
     m_os << "<Nary_Pred op=\"&amp;\">\n";

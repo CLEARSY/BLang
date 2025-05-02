@@ -40,6 +40,7 @@ TEST_F(BLangExpressionFmtTest, ConstantExpressionFormatting) {
             "bool(TRUE = FALSE)");
   EXPECT_EQ(fmt::format("{}", BLang::ExpressionFactory::IntegerLiteral("42")),
             "42");
+  EXPECT_EQ(fmt::format("{}", BLang::ExpressionFactory::Data("foo")), "foo");
 }
 
 // main function

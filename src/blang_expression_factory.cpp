@@ -47,6 +47,7 @@ class ExpressionCache {
   mutable shared_mutex m_basic;
   mutable shared_mutex m_mutexConversionBool;
   mutable shared_mutex m_mutexIntegerLiteral;
+  mutable shared_mutex m_mutexData;
   mutable shared_mutex m_mutexIndex;
 
   unordered_map<shared_ptr<Predicate>, shared_ptr<Expression::ConversionBool>,
@@ -56,6 +57,8 @@ class ExpressionCache {
   unordered_map<string, shared_ptr<Expression::IntegerLiteral>,
                 std::hash<string>>
       m_integerLiterals;
+
+  unordered_map<string, shared_ptr<Expression::Data>, std::hash<string>> m_data;
 
   shared_ptr<Expression> m_TRUE;
   shared_ptr<Expression> m_FALSE;
@@ -161,6 +164,28 @@ class ExpressionCache {
     index(newExpression);
     return newExpression;
   }
+
+  shared_ptr<Expression> getData(const string& name) {
+    {
+      readlock rlock(m_mutexData);
+      auto it = m_data.find(name);
+      if (it != m_data.end()) {
+        return it->second;
+      }
+    }
+    shared_ptr<Expression::Data> newExpression;
+    {
+      writelock wlock(m_mutexData);
+      auto it = m_data.find(name);
+      if (it != m_data.end()) {
+        return it->second;
+      }
+      newExpression = std::make_shared<Expression::Data>(name);
+      m_data[name] = newExpression;
+    }
+    index(newExpression);
+    return newExpression;
+  }
 };
 
 static std::unique_ptr<ExpressionCache> cache =
@@ -179,6 +204,10 @@ shared_ptr<Expression> ExpressionFactory::ConversionBool(
 
 shared_ptr<Expression> ExpressionFactory::IntegerLiteral(const string& value) {
   return cache->getIntegerLiteral(value);
+}
+
+shared_ptr<Expression> ExpressionFactory::Data(const string& name) {
+  return cache->getData(name);
 }
 
 size_t ExpressionFactory::size() { return cache->size(); }

@@ -39,6 +39,11 @@ std::shared_ptr<const Expression::IntegerLiteral> Expression::toIntegerLiteral()
       this->shared_from_this());
 }
 
+std::shared_ptr<const Expression::Data> Expression::toData() const {
+  if (m_kind != Kind::Data) return nullptr;
+  return std::dynamic_pointer_cast<const Data>(this->shared_from_this());
+}
+
 int Expression::compare(const Expression& v1, const Expression& v2) {
   size_t hash1 = v1.hash_combine(0);
   size_t hash2 = v2.hash_combine(0);
@@ -60,6 +65,8 @@ size_t Expression::hash_combine(size_t seed) const {
       return toConversionBool()->hash_combine(seed);
     case Kind::IntegerLiteral:
       return toIntegerLiteral()->hash_combine(seed);
+    case Kind::Data:
+      return toData()->hash_combine(seed);
   }
   // Should never reach here
   return seed;
@@ -71,6 +78,10 @@ size_t Expression::ConversionBool::hash_combine(size_t seed) const {
 
 size_t Expression::IntegerLiteral::hash_combine(size_t seed) const {
   return hash_combine_string(m_value, seed);
+}
+
+size_t Expression::Data::hash_combine(size_t seed) const {
+  return hash_combine_string(m_name, seed);
 }
 
 // Definition of the virtual accept function
@@ -87,6 +98,9 @@ void Expression::accept(Visitor& v) const {
       break;
     case Kind::IntegerLiteral:
       toIntegerLiteral()->accept(v);
+      break;
+    case Kind::Data:
+      toData()->accept(v);
       break;
   }
 }

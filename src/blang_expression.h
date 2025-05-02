@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <exception>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -63,12 +64,14 @@ class Expression : public std::enable_shared_from_this<Expression> {
     FALSE,
     ConversionBool,
     IntegerLiteral,
+    Data, /** @brief Data as in 5.1 Primary expressions */
   };
   Kind getKind() const { return m_kind; };
 
   // Forward declaration of derived classes
   class ConversionBool;
   class IntegerLiteral;
+  class Data;
 
   /** @brief converts a predicate to a Boolean expression, if possible.
    * @return a shared pointer to the corresponding Boolean expression, or
@@ -80,6 +83,11 @@ class Expression : public std::enable_shared_from_this<Expression> {
    * nullptr if not possible.
    */
   std::shared_ptr<const IntegerLiteral> toIntegerLiteral() const;
+  /** @brief converts a predicate to a Data expression, if possible.
+   * @return a shared pointer to the corresponding Data expression, or
+   * nullptr if not possible.
+   */
+  std::shared_ptr<const Data> toData() const;
 
   /**
    * @brief Abstract visitor class for the Expression hierarchy.
@@ -92,6 +100,7 @@ class Expression : public std::enable_shared_from_this<Expression> {
     virtual void visitFALSE() = 0;
     virtual void visitConversionBool(const ConversionBool &v) = 0;
     virtual void visitIntegerLiteral(const IntegerLiteral &v) = 0;
+    virtual void visitData(const Data &v) = 0;
   };
   virtual void accept(Visitor &v) const;
 
@@ -215,6 +224,7 @@ class ExpressionFactory {
   static std::shared_ptr<Expression> ConversionBool(
       std::shared_ptr<Predicate> pred);
   static std::shared_ptr<Expression> IntegerLiteral(const std::string &value);
+  static std::shared_ptr<Expression> Data(const std::string &value);
 
   /**
    * @brief Gets the number of Expressions created by the factory.
@@ -267,6 +277,20 @@ class Expression::IntegerLiteral : public Expression {
 
  protected:
   const std::string m_value;
+};
+
+class Expression::Data : public Expression {
+ public:
+  void accept(Visitor &v) const override { v.visitData(*this); }
+  size_t hash_combine(size_t seed) const override;
+  Data(const std::string &name) : Expression(Kind::Data), m_name{name} {}
+  virtual ~Data() = default;
+  const std::string &name() const { return m_name; }
+  friend class ExpressionFactory;
+  friend class ExpressionCache;
+
+ protected:
+  const std::string m_name;
 };
 }  // namespace BLang
 

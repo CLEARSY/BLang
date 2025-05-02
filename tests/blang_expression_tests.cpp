@@ -107,6 +107,9 @@ class TestVisitor : public BLang::Expression::Visitor {
   void visitIntegerLiteral(const BLang::Expression::IntegerLiteral &) override {
     lastVisited = "IntegerLiteral";
   }
+  void visitData(const BLang::Expression::Data &) override {
+    lastVisited = "Data";
+  }
   std::string lastVisited;
 };
 
@@ -127,6 +130,9 @@ TEST_F(BLangExpressionTest, VisitorPattern) {
 
   BLang::ExpressionFactory::IntegerLiteral("42")->accept(visitor);
   EXPECT_EQ(visitor.lastVisited, "IntegerLiteral");
+
+  BLang::ExpressionFactory::Data("foo")->accept(visitor);
+  EXPECT_EQ(visitor.lastVisited, "Data");
 }
 
 int main(int argc, char **argv) {

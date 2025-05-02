@@ -197,6 +197,12 @@ shared_ptr<Expression> readExpression(const tinyxml2::XMLElement* root) {
       throw Exception("Failed to read predicate from Boolean_Exp");
     }
     return ExpressionFactory::ConversionBool(predicate);
+  } else if (strcmp(root->Name(), "Id") == 0) {
+    const char* name = root->Attribute("value");
+    if (!name) {
+      throw Exception("Missing value attribute");
+    }
+    return ExpressionFactory::Data(name);
   } else {
     throw Exception("Unknown root element: " + std::string(root->Name()));
   }
