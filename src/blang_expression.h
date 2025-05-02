@@ -62,17 +62,24 @@ class Expression : public std::enable_shared_from_this<Expression> {
     TRUE,
     FALSE,
     ConversionBool,
+    IntegerLiteral,
   };
   Kind getKind() const { return m_kind; };
 
   // Forward declaration of derived classes
   class ConversionBool;
+  class IntegerLiteral;
 
   /** @brief converts a predicate to a Boolean expression, if possible.
    * @return a shared pointer to the corresponding Boolean expression, or
    * nullptr if not possible.
    */
   std::shared_ptr<const ConversionBool> toConversionBool() const;
+  /** @brief converts a predicate to an IntegerLiteral expression, if possible.
+   * @return a shared pointer to the corresponding IntegerLiteral expression, or
+   * nullptr if not possible.
+   */
+  std::shared_ptr<const IntegerLiteral> toIntegerLiteral() const;
 
   /**
    * @brief Abstract visitor class for the Expression hierarchy.
@@ -84,6 +91,7 @@ class Expression : public std::enable_shared_from_this<Expression> {
     virtual void visitTRUE() = 0;
     virtual void visitFALSE() = 0;
     virtual void visitConversionBool(const ConversionBool &v) = 0;
+    virtual void visitIntegerLiteral(const IntegerLiteral &v) = 0;
   };
   virtual void accept(Visitor &v) const;
 
@@ -206,6 +214,7 @@ class ExpressionFactory {
   static std::shared_ptr<Expression> FALSE();
   static std::shared_ptr<Expression> ConversionBool(
       std::shared_ptr<Predicate> pred);
+  static std::shared_ptr<Expression> IntegerLiteral(const std::string &value);
 
   /**
    * @brief Gets the number of Expressions created by the factory.
@@ -245,6 +254,20 @@ class Expression::ConversionBool : public Expression {
   std::shared_ptr<Predicate> m_pred;
 };
 
+class Expression::IntegerLiteral : public Expression {
+ public:
+  void accept(Visitor &v) const override { v.visitIntegerLiteral(*this); }
+  size_t hash_combine(size_t seed) const override;
+  IntegerLiteral(const std::string &value)
+      : Expression(Kind::IntegerLiteral), m_value{value} {}
+  virtual ~IntegerLiteral() = default;
+  const std::string &value() const { return m_value; }
+  friend class ExpressionFactory;
+  friend class ExpressionCache;
+
+ protected:
+  const std::string m_value;
+};
 }  // namespace BLang
 
 #endif  // BLANG_EXPRESSION_H

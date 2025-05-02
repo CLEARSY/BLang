@@ -6,14 +6,20 @@ BLang is a C++ library designed to represent the B language. It is thread-safe a
 
 ## Features
 
-- Basic Types: Integer, Boolean, Float, Real, String
-- Complex Types: Product, Power Set, Abstract Set, Enumerated Set, Struct
-- Type Comparisons: Equality, Inequality, Less than, Greater than, etc.
-- Visitor Pattern: For type-specific operations
-- Thread Safety: Ensures safe operations in multi-threaded environments
-- Maximal Sharing: Efficient memory usage by sharing common subtypes
-- Expressions: TRUE and FALSE only
+- Type system:
+    - Basic Types: Integer, Boolean, Float, Real, String
+    - Complex Types: Product, Power Set, Abstract Set, Enumerated Set, Struct
+    - Type Comparisons: Equality, Inequality, Less than, Greater than, etc.
+    - Undefined type
+- Expressions: 
+  - Boolean literals: `TRUE` and `FALSE`
+  - `bool` operator
+  - Integer literals
 - Predicates: Conjunction, Disjunction, Implication, Equivalence, Negation, Equality
+- Maximal Sharing: Efficient memory usage by sharing common subtypes, sub-expressions, sub-predicates
+- Visitor Pattern
+- Thread Safety: Ensures safe operations in multi-threaded environments
+- Formatter: Provides a formatter suitable for the `fmt` library
 
 ## Installation
 

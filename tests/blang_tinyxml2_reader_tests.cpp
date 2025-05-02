@@ -133,6 +133,7 @@ TEST_F(BLangTinyXml2ReaderTest, ReadExpression) {
         <Boolean_Literal value="TRUE"/>
       </Exp_Comparison>
     </Boolean_Exp>
+    <Integer_Literal value="42"/>
   </Expressions>
   )";
 
@@ -144,28 +145,52 @@ TEST_F(BLangTinyXml2ReaderTest, ReadExpression) {
   tinyxml2::XMLElement* root = doc.FirstChildElement();
   ASSERT_NE(root, nullptr) << "Root element not found";
 
+  int count = 1;
   tinyxml2::XMLElement* elem1 = root->FirstChildElement();
-  ASSERT_NE(elem1, nullptr) << "First child element not found";
-  tinyxml2::XMLElement* elem2 = elem1->NextSiblingElement();
-  ASSERT_NE(elem2, nullptr) << "Second child element not found";
-  tinyxml2::XMLElement* elem3 = elem2->NextSiblingElement();
-  ASSERT_NE(elem3, nullptr) << "Third child element not found";
+  ASSERT_NE(elem1, nullptr) << "Child element " << count << " not found";
   std::shared_ptr<BLang::Expression> expr1;
-  std::shared_ptr<BLang::Expression> expr2;
-  std::shared_ptr<BLang::Expression> expr3;
   try {
     expr1 = BLang::readExpression(elem1);
-    expr2 = BLang::readExpression(elem2);
-    expr3 = BLang::readExpression(elem3);
   } catch (const BLang::ExpressionFactory::Exception& e) {
     FAIL() << "Exception during XML build: " << e.what();
   }
   ASSERT_EQ(expr1, BLang::ExpressionFactory::TRUE());
+
+  ++count;
+  tinyxml2::XMLElement* elem2 = elem1->NextSiblingElement();
+  ASSERT_NE(elem1, nullptr) << "Child element " << count << " not found";
+  std::shared_ptr<BLang::Expression> expr2;
+  try {
+    expr2 = BLang::readExpression(elem2);
+  } catch (const BLang::ExpressionFactory::Exception& e) {
+    FAIL() << "Exception during XML build: " << e.what();
+  }
   ASSERT_EQ(expr2, BLang::ExpressionFactory::FALSE());
+
+  ++count;
+  tinyxml2::XMLElement* elem3 = elem2->NextSiblingElement();
+  ASSERT_NE(elem1, nullptr) << "Child element " << count << " not found";
+  std::shared_ptr<BLang::Expression> expr3;
+  try {
+    expr3 = BLang::readExpression(elem3);
+  } catch (const BLang::ExpressionFactory::Exception& e) {
+    FAIL() << "Exception during XML build: " << e.what();
+  }
   ASSERT_EQ(expr3, BLang::ExpressionFactory::ConversionBool(
                        BLang::PredicateFactory::Equality(
                            BLang::ExpressionFactory::FALSE(),
                            BLang::ExpressionFactory::TRUE())));
+
+  ++count;
+  tinyxml2::XMLElement* elem4 = elem3->NextSiblingElement();
+  ASSERT_NE(elem1, nullptr) << "Child element " << count << " not found";
+  std::shared_ptr<BLang::Expression> expr4;
+  try {
+    expr4 = BLang::readExpression(elem4);
+  } catch (const BLang::ExpressionFactory::Exception& e) {
+    FAIL() << "Exception during XML build: " << e.what();
+  }
+  ASSERT_EQ(expr4, BLang::ExpressionFactory::IntegerLiteral("42"));
 }
 
 TEST_F(BLangTinyXml2ReaderTest, ReadPredicate) {

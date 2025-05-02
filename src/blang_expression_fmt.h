@@ -67,6 +67,10 @@ struct fmt::formatter<BLang::Expression> {
           const BLang::Expression::ConversionBool& expr) override {
         result = fmt::format("{}", expr);
       }
+      void visitIntegerLiteral(
+          const BLang::Expression::IntegerLiteral& expr) override {
+        result = fmt::format("{}", expr.value());
+      }
     };
 
     FormatterVisitor visitor;
@@ -85,6 +89,19 @@ struct fmt::formatter<BLang::Expression::ConversionBool> {
   auto format(const BLang::Expression::ConversionBool& expr,
               FormatContext& ctx) const -> decltype(ctx.out()) {
     return fmt::format_to(ctx.out(), "bool{}", expr.pred());
+  }
+};
+
+template <>
+struct fmt::formatter<BLang::Expression::IntegerLiteral> {
+  constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+    return ctx.begin();
+  }
+
+  template <typename FormatContext>
+  auto format(const BLang::Expression::IntegerLiteral& expr,
+              FormatContext& ctx) const -> decltype(ctx.out()) {
+    return fmt::format_to(ctx.out(), "{}", expr.value());
   }
 };
 

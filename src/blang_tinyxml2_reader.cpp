@@ -181,6 +181,22 @@ shared_ptr<Expression> readExpression(const tinyxml2::XMLElement* root) {
       throw Exception("Failed to read predicate from Boolean_Exp");
     }
     return ExpressionFactory::ConversionBool(predicate);
+  } else if (strcmp(root->Name(), "Integer_Literal") == 0) {
+    const char* value = root->Attribute("value");
+    if (!value) {
+      throw Exception("Missing value attribute");
+    }
+    return ExpressionFactory::IntegerLiteral(value);
+  } else if (strcmp(root->Name(), "Boolean_Exp") == 0) {
+    const tinyxml2::XMLElement* predElem = root->FirstChildElement();
+    if (predElem == nullptr) {
+      throw Exception("Empty Boolean_Exp element");
+    }
+    std::shared_ptr<Predicate> predicate = readPredicate(predElem);
+    if (predicate == nullptr) {
+      throw Exception("Failed to read predicate from Boolean_Exp");
+    }
+    return ExpressionFactory::ConversionBool(predicate);
   } else {
     throw Exception("Unknown root element: " + std::string(root->Name()));
   }
